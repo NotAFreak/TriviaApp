@@ -58,6 +58,7 @@ public class Client
             Random r = new(now.Year * now.Month * now.Day);
             instance.currentDailyQuestion = questions[r.Next(0, questions.Count)];
             instance.currentDailyQuestionRetrieveTime = now;
+            return;
         }
 
         APIResponse? response = JsonConvert.DeserializeObject<APIResponse>(json);
@@ -143,11 +144,11 @@ public class Client
 
     private static async Task<string> JsonFromAPI(string url) {
         try {
+            instance.client.Timeout = TimeSpan.FromSeconds(5);
             HttpResponseMessage response = await instance.client.GetAsync(url);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             throw new Exception("Couldn't download JSON from API: " + ex.Message);
         }
     }
