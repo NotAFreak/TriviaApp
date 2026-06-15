@@ -1,0 +1,1 @@
+dotnet ef dbcontext scaffold "Data Source =/home/notafreak/Documents/School/Digital Solutions/IA3/TriviaApp/trivia.db" Microsoft.EntityFrameworkCore.Sqlite -o Models --force

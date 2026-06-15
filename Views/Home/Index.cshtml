@@ -1,8 +1,172 @@
-﻿@{
+﻿@using System.Globalization
+@model TriviaApp.ViewModels.HomeViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
+<h1>Home</h1>
+<div class="d-flex">
+    <div class="col-md-3 p-1">
+        <h2>Leaderboards</h2>
+        <div class="card mb-3 shadow">
+            <h3 class="card-header text-center">Global Leaderboard</h3>
+            <div class="card-body">
+                
+            </div>
+        </div>
+        <div class="card mb-3 shadow">
+            <h3 class="card-header text-center">Daily Leaderboard</h3>
+            <div class="card-body">
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+            </div>
+        </div>
+    </div>
+    <hr class="vr"/>
+    <div class="col-md-6 p-1">
+        <h2>Questions</h2>
+        <div class="card mb-3 shadow" style="visibility: collapse">
+            <h3 class="card-header text-center">Regular Question</h3>
+            <div class="card-body">
+                <h4>Question</h4>
+                <hr/>
+                <h5>How do you do X?</h5>
+            </div>
+            <div class="card-body">
+                <h4>Answers</h4>
+                <hr/>
+                <div class="row">
+                    <div class="col-md ms-auto">
+                        <input type="radio" autocomplete="false" class="btn-check" name="btn_Question" id="btn_Question0"/>
+                        <label class="btn btn-outline-primary" for="btn_Question0">Answer</label>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="button" class="btn btn-primary float-end">Submit</button>
+            </div>
+        </div>
+        <!--Daily APIQuestion-->
+        <div>
+            <div id="spin_DailyQuestion" class="align-self-center spinner-border spinner-border-sm" role="status" style=" visibility: collapse">
+            </div>
+            <div id="crd_StartDailyQuestion" class="card mb-3 shadow" style="visibility: visible;">
+                <h3 class="card-header text-center">Daily Question</h3>
+                <div class="card-body">
+                    <button type="button" onclick="StartDailyQuestion()" class="btn btn-primary float-end">Start</button>
+                </div>
+                <div class="card-footer">
+                    
+                </div>
+            </div>
+            <div id="crd_DailyQuestion" class="card mb-3 shadow" style="visibility: collapse;">
+                <h3 class="card-header text-center">Daily Question</h3>
+                <div class="card-body">
+                    <h4>Question</h4>
+                    <hr/>
+                    <h5 id="txt_DailyQuestion">QUESTION HERE?</h5>
+                </div>
+                <div class="card-body">
+                    <h4>Answers</h4>
+                    <hr/>
+                    <div id="dv_AnswerContainer" class="row">
+                        <div class="col-md ms-auto">
+                            <input type="radio" autocomplete="false" class="btn-check" name="btn_DailyQuestion" id="btn_DailyQuestion1"/>
+                            <label class="btn btn-outline-primary" for="btn_DailyQuestion1">Answer</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button id="btn_DailyQuestionSubmit" type="button" class="btn btn-primary float-end">Submit</button>
+                </div>
+            </div>
+            <div id="alrt_NoDailyQuestion" class="alert alert-dismissible alert-secondary mb-3 shadow" style="visibility: collapse">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <p>Already completed today's trivia question</p>
+            </div>
+        </div>
+    </div>
+    <hr class="vr"/>
+    <div class="col-md-3 p-1">
+        <h2>Statistics</h2>
+        @if (User.Identity is not null && User.Identity.IsAuthenticated) {
+            <div class="card h-100 mb-3 shadow">
+                <h3 class="card-header text-center">@(User.FindFirst("username")?.Value)'s Statistics</h3>
+                <div class="card-body">
+                    <h4>Scores</h4>
+                    <div class="form-horizontal">
+                        <label class="float-end">@Model.TotalAnswered.ToString(CultureInfo.InvariantCulture)</label>
+                        <label class="">Total Answered: </label>
+                    </div>
+                    <div class="form-horizontal">
+                        <label class="float-end">@Model.TotalCorrect.ToString(CultureInfo.InvariantCulture)</label>
+                        <label>Total Correct: </label>
+                    </div>
+                    <div class="form-horizontal">
+                        <label class="float-end">@Model.TotalIncorrect.ToString(CultureInfo.InvariantCulture)</label>
+                        <label>Total Incorrect: </label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h4>Times</h4>
+                    <div class="form-horizontal">
+                        <label class="float-end">@Model.AverageAnswerTime.ToString(CultureInfo.InvariantCulture)s</label>
+                        <label>Average Answer Time: </label>
+                    </div>
+                    <div class="form-horizontal">
+                        <label class="float-end">@Model.MinimumAnswerTime.ToString(CultureInfo.InvariantCulture)s</label>
+                        <label>Minimum Answer Time: </label>
+                    </div>
+                    <div class="form-horizontal">
+                        <label class="float-end">@Model.MaximumAnswerTime.ToString(CultureInfo.InvariantCulture)s</label>
+                        <label>Maximum Answer Time: </label>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>
+@section Scripts {
+    <script>
+        @* document.addEventListener("DOMContentLoaded", function() { *@
+        @*     GetDailyQuestion(); *@
+        @* }); *@
+        
+        function StartDailyQuestion() {
+            document.getElementById("crd_StartDailyQuestion").style.visibility = "collapse";
+            GetDailyQuestion();
+        }
+
+        function DisplayDailyAPIQuestion(data, status) {
+            let d = JSON.parse(data);
+            if(d.HasCompleted) {
+                document.getElementById("crd_DailyQuestion").style.visibility = "collapse";
+                document.getElementById("alrt_NoDailyQuestion").style.visibility = "visible";
+            } else {
+                document.getElementById("crd_DailyQuestion").style.visibility = "visible";
+                document.getElementById("alrt_NoDailyQuestion").style.visibility = "collapse";
+                
+                document.getElementById("txt_DailyQuestion").innerHTML = d.question.Text;
+                let answerContainer = document.getElementById("dv_AnswerContainer");
+                answerContainer.innerHTML = "";
+                for(let i = 0; i < d.question.Answers.length; i++) {
+                    let answer = d.question.Answers[i];
+                    let answerElement = document.createElement("div");
+                    answerElement.setAttribute("class", "col-md ms-auto")
+                    answerElement.innerHTML = '' +
+                        '    <input type="radio" autocomplete="false" class="btn-check" name="btn_DailyQuestion" id="btn_DailyQuestion' + i + '"/>\n' +
+                        '    <label class="btn btn-outline-primary" for="btn_DailyQuestion' + i + '">' + answer.Text + '</label>\n';
+                    answerContainer.appendChild(answerElement);
+                }
+            }
+            document.getElementById("spin_DailyQuestion").style.visibility = "collapse";
+        }
+        function GetDailyQuestion() {
+            let spinner = document.getElementById("spin_DailyQuestion");
+            spinner.style.visibility = "visible";
+            $.ajax({
+                url:"/Home/GetDailyQuestion",
+                dataType: "json",
+                success: DisplayDailyAPIQuestion
+            })
+        }
+    </script>
+}

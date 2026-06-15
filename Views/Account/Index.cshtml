@@ -1,0 +1,47 @@
+@{
+    ViewData["Title"] = "Account";
+}
+
+<div class="row">
+    <div class="col-md">
+        @if (!string.IsNullOrEmpty((string?)TempData["Error"])) {
+            <div class="alert alert-dismissible alert-danger">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong>@TempData["Error"]</strong>
+            </div>
+        }
+        <form asp-action="LogoutPost" asp-controller="Account">
+            <button type="submit" class="btn btn-danger" asp-controller="Account" asp-action="LogoutPost">Logout</button>
+        </form>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-account-modal">
+            Delete Account
+        </button>
+    </div>
+</div>
+
+<!-- Modals -->
+<div class="modal fade" id="delete-account-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="DeleteAccountPost" asp-controller="Account" method="post">
+                <div class="modal-body">
+                    <div class="row ps-2">
+                        <h6>Are you sure you'd Like to delete your account?</h6>
+                    </div>
+                    <div class="row ps-2 input-group">
+                        <label for="in_Password">Password</label>
+                        <input id="in_Password" type="password" autocomplete="false" name="password" class="form-control"/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger float-start">Delete</button>
+                    <button type="button" class="btn btn-primary float-end" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
