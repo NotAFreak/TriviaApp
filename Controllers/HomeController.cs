@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using TriviaApp.Models;
+using TriviaApp.Runtime;
 using TriviaApp.ViewModels;
 using Question = TriviaApp.Models.Question;
 
@@ -21,27 +22,37 @@ public class HomeController : Controller {
     public async Task TryAddNewQuestion(Question question) {
         
     }
+
+    public bool IsUser() {
+        return HttpContext.User.Identity is not null && HttpContext.User.Identity.IsAuthenticated;
+    }
+    
+    /// <returns>User ID on success, -1 on fail</returns>
+    public async Task<int?> GetUserId() {
+        Claim? userIdClaim = HttpContext.User.FindFirst("userid");
+        if (userIdClaim is null) {
+            TempData["Error"] = "User not correctly logged in!";
+            await HttpContext.SignOutAsync();
+            return null;
+        }
+
+        User? user = db.Users.Include(o=>o.UserQuestions).FirstOrDefault(o => o.UserId == Convert.ToInt32(userIdClaim.Value));
+        if (user is null) {
+            TempData["Error"] = "User does not exist!";
+            await HttpContext.SignOutAsync();
+            return null;
+        }
+
+        return user.UserId;
+    }
     
     // AJAX
     [HttpGet]
     public async Task<IActionResult> GetDailyQuestion() {
-        DailyQuestionViewModel vm = new();
-        bool isUser = HttpContext.User.Identity is not null && HttpContext.User.Identity.IsAuthenticated;
+        DailyQuestionRequestViewModel vm = new();
+        bool isUser = IsUser();
         if (isUser) {
-            Claim? userIdClaim = HttpContext.User.FindFirst("userid");
-            if (userIdClaim is null) {
-                TempData["Error"] = "User not correctly logged in!";
-                await HttpContext.SignOutAsync();
-                return RedirectToAction("Login", "Account");
-            }
-
-            User? user = db.Users.Include(o=>o.UserQuestions).FirstOrDefault(o => o.UserId == Convert.ToInt32(userIdClaim.Value));
-            if (user is null) {
-                TempData["Error"] = "User does not exist!";
-                await HttpContext.SignOutAsync();
-                return RedirectToAction("Login", "Account");
-            }
-            
+            int? userId = await GetUserId();
         } else {
             Claim? claim = HttpContext.User.FindFirst("completed_Daily");
             if (claim is null) {
@@ -51,13 +62,47 @@ public class HomeController : Controller {
             }
         }
 
-        Question? originalQuestion = null;
         if (!vm.HasCompleted) {
-            originalQuestion = await TriviaAPI.Client.CurrentDailyQuestion(db);
-            if (originalQuestion is not null) {
-                TryAddNewQuestion(originalQuestion);
-            }
+            Question originalQuestion = await TriviaAPI.Client.CurrentDailyQuestion(db);
+            await TryAddNewQuestion(originalQuestion);
             vm.question = new ClientQuestion(originalQuestion);
+        }
+
+        if (isUser) {
+            Assert.IsNotNull(vm.question);
+            TriviaTimer.StartUser((int)await GetUserId(), vm.question.QuestionId);
+        }
+        return Json(JsonConvert.SerializeObject(vm));
+    }
+    
+    // AJAX
+    [HttpGet]
+    public async Task<IActionResult> SubmitDailyQuestion(int answerId) {
+        Question question = await TriviaAPI.Client.CurrentDailyQuestion(db);
+        int? userId = await GetUserId();
+        if (userId is not null) {
+            if (!TriviaTimer.UserAlreadyExists((int)userId)) {
+                ViewBag["Error"] = "User hasn't started this question!";
+                return RedirectToAction("Index", "Home");
+            }
+        }
+        DailyQuestionSubmitViewModel vm = new();
+        Answer? answer = question.Answers.FirstOrDefault(o => o.AnswerId == answerId);
+        if (answer is null) {
+            ViewBag["Error"] = "Answer doesn't exist!";
+            return RedirectToAction("Index", "Home");
+        }
+        vm.state = Convert.ToBoolean(answer.IsCorrect) ? CompletionState.Correct : CompletionState.Incorrect;
+        if (IsUser() && userId is not null) {
+            vm.timing = TriviaTimer.FinishUser((int)userId);
+
+            await db.UserQuestions.AddAsync(new UserQuestion() {
+                CompletionState = (int)vm.state,
+                CompletionTime = ((vm.timing.finishTime - vm.timing.startTime)!).Value.TotalSeconds,
+                QuestionId = question.QuestionId,
+                UserId = (int)userId
+            });
+            await db.SaveChangesAsync();
         }
         return Json(JsonConvert.SerializeObject(vm));
     }

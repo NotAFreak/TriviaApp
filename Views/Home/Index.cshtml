@@ -23,27 +23,6 @@
     <hr class="vr"/>
     <div class="col-md-6 p-1">
         <h2>Questions</h2>
-        <div class="card mb-3 shadow" style="visibility: collapse">
-            <h3 class="card-header text-center">Regular Question</h3>
-            <div class="card-body">
-                <h4>Question</h4>
-                <hr/>
-                <h5>How do you do X?</h5>
-            </div>
-            <div class="card-body">
-                <h4>Answers</h4>
-                <hr/>
-                <div class="row">
-                    <div class="col-md ms-auto">
-                        <input type="radio" autocomplete="false" class="btn-check" name="btn_Question" id="btn_Question0"/>
-                        <label class="btn btn-outline-primary" for="btn_Question0">Answer</label>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer">
-                <button type="button" class="btn btn-primary float-end">Submit</button>
-            </div>
-        </div>
         <!--Daily APIQuestion-->
         <div>
             <div id="spin_DailyQuestion" class="align-self-center spinner-border spinner-border-sm" role="status" style=" visibility: collapse">
@@ -55,6 +34,18 @@
                 </div>
                 <div class="card-footer">
                     
+                </div>
+            </div>
+            <div id="crd_CorrectDailyQuestion" class="card mb-3 text-white shadow bg-success" style="visibility: collapse;">
+                <h3 class="card-header text-center">Daily Question</h3>
+                <div class="card-body">
+                    <h4>Correct!</h4>
+                </div>
+            </div>
+            <div id="crd_IncorrectDailyQuestion" class="card mb-3 text-white shadow bg-danger" style="visibility: collapse;">
+                <h3 class="card-header text-center">Daily Question</h3>
+                <div class="card-body">
+                    <h4>Incorrect.</h4>
                 </div>
             </div>
             <div id="crd_DailyQuestion" class="card mb-3 shadow" style="visibility: collapse;">
@@ -75,7 +66,7 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    <button id="btn_DailyQuestionSubmit" type="button" class="btn btn-primary float-end">Submit</button>
+                    <button id="btn_DailyQuestionSubmit" type="button" onclick="SubmitDailyQuestion()" class="btn btn-primary float-end">Submit</button>
                 </div>
             </div>
             <div id="alrt_NoDailyQuestion" class="alert alert-dismissible alert-secondary mb-3 shadow" style="visibility: collapse">
@@ -126,16 +117,54 @@
 </div>
 @section Scripts {
     <script>
+        function ShowLoading() {
+            document.getElementById("spin_DailyQuestion").style.visibility = "visible";
+        }
+        function HideLoading() {
+            document.getElementById("spin_DailyQuestion").style.visibility = "collapse";
+        }
         @* document.addEventListener("DOMContentLoaded", function() { *@
         @*     GetDailyQuestion(); *@
         @* }); *@
+        
+        function SubmitDailyQuestion() {
+            let radioButton = document.querySelector('input[name="btn_DailyQuestion"]:checked');
+            if(radioButton == null) return;
+            ShowLoading()
+            $.ajax({
+                url:"/Home/SubmitDailyQuestion",
+                dataType: "json",
+                data: {
+                    answerId: radioButton.value
+                },
+                success: SubmitDailyQuestionCallback
+            })
+        }
+        function SubmitDailyQuestionCallback(data, status) {
+            let d = JSON.parse(data);
+            
+            HideLoading();
+            console.log("got callback from submitting question");
+            switch (d.state) {
+                case 0: // Unknown
+                    break;
+                case 1: // Correct
+                    document.getElementById("crd_CorrectDailyQuestion").style.visibility = "visible";
+                    break;
+                case 2: // Incorrect
+                    document.getElementById("crd_IncorrectDailyQuestion").style.visibility = "visible";
+                    break;
+                case 3: // Out of time
+                    break;
+            }
+        }
         
         function StartDailyQuestion() {
             document.getElementById("crd_StartDailyQuestion").style.visibility = "collapse";
             GetDailyQuestion();
         }
 
-        function DisplayDailyAPIQuestion(data, status) {
+        function DisplayDailyAPIQuestionCallback(data, status) {
             let d = JSON.parse(data);
             if(d.HasCompleted) {
                 document.getElementById("crd_DailyQuestion").style.visibility = "collapse";
@@ -152,20 +181,19 @@
                     let answerElement = document.createElement("div");
                     answerElement.setAttribute("class", "col-md ms-auto")
                     answerElement.innerHTML = '' +
-                        '    <input type="radio" autocomplete="false" class="btn-check" name="btn_DailyQuestion" id="btn_DailyQuestion' + i + '"/>\n' +
+                        '    <input type="radio" autocomplete="false" value="' + answer.AnswerID + '" class="btn-check" name="btn_DailyQuestion" id="btn_DailyQuestion' + i + '"/>\n' +
                         '    <label class="btn btn-outline-primary" for="btn_DailyQuestion' + i + '">' + answer.Text + '</label>\n';
                     answerContainer.appendChild(answerElement);
                 }
             }
-            document.getElementById("spin_DailyQuestion").style.visibility = "collapse";
+            HideLoading();
         }
         function GetDailyQuestion() {
-            let spinner = document.getElementById("spin_DailyQuestion");
-            spinner.style.visibility = "visible";
+           ShowLoading();
             $.ajax({
                 url:"/Home/GetDailyQuestion",
                 dataType: "json",
-                success: DisplayDailyAPIQuestion
+                success: DisplayDailyAPIQuestionCallback
             })
         }
     </script>

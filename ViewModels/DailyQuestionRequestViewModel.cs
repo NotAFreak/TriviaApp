@@ -1,13 +1,14 @@
 #nullable enable
 using TriviaApp.Models;
+using TriviaApp.Runtime;
 using TriviaApp.ViewModels;
 
 // Strip out extra information so the player cant cheat
 public class ClientAnswer {
-	public int AnswerId;
+	public int AnswerID;
 	public string Text;
 	public ClientAnswer(Answer answer) {
-		this.AnswerId = answer.AnswerId;
+		this.AnswerID = answer.AnswerId;
 		this.Text = answer.Text;
 	}
 }
@@ -25,7 +26,12 @@ public class ClientQuestion {
 	}
 }
 
-public class DailyQuestionViewModel : BaseViewModel {
+public class DailyQuestionRequestViewModel : BaseViewModel {
 	public bool HasCompleted = false;
 	public ClientQuestion? question = null;
+}
+
+public class DailyQuestionSubmitViewModel : BaseViewModel {
+	public CompletionState state;
+	public UserTiming timing;
 }
