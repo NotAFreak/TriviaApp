@@ -89,12 +89,11 @@ public partial class TriviaContext : DbContext
 
         modelBuilder.Entity<UserQuestion>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.QuestionId });
-
             entity.ToTable("UserQuestion");
 
-            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.UserQuestionId).HasColumnName("UserQuestionID");
             entity.Property(e => e.QuestionId).HasColumnName("QuestionID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
 
             entity.HasOne(d => d.Question).WithMany(p => p.UserQuestions)
                 .HasForeignKey(d => d.QuestionId)

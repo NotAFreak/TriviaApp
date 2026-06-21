@@ -52,20 +52,24 @@ public class HomeController : Controller {
         DailyQuestionRequestViewModel vm = new();
         bool isUser = IsUser();
         if (isUser) {
-            int? userId = await GetUserId();
+            int userId = (int)await GetUserId();
+            User? user = await db.Users.Include(o => o.UserQuestions).FirstOrDefaultAsync(o=>o.UserId == (int)userId);
+            
+            Question originalQuestion = await TriviaAPI.Client.CurrentDailyQuestion(db);
+            await TryAddNewQuestion(originalQuestion);
+            vm.question = new ClientQuestion(originalQuestion);
+            UserQuestion? answer = user.UserQuestions.FirstOrDefault(o => o.QuestionId == vm.question.QuestionId);
+            vm.HasCompleted = answer is not null;
         } else {
             Claim? claim = HttpContext.User.FindFirst("completed_Daily");
             if (claim is null) {
                 vm.HasCompleted = false;
+                Question originalQuestion = await TriviaAPI.Client.CurrentDailyQuestion(db);
+                await TryAddNewQuestion(originalQuestion);
+                vm.question = new ClientQuestion(originalQuestion);
             } else {
                 vm.HasCompleted = Convert.ToBoolean(claim.Value);
             }
-        }
-
-        if (!vm.HasCompleted) {
-            Question originalQuestion = await TriviaAPI.Client.CurrentDailyQuestion(db);
-            await TryAddNewQuestion(originalQuestion);
-            vm.question = new ClientQuestion(originalQuestion);
         }
 
         if (isUser) {

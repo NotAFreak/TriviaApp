@@ -5,6 +5,8 @@ namespace TriviaApp.Models;
 
 public partial class UserQuestion
 {
+    public int UserQuestionId { get; set; }
+
     public int UserId { get; set; }
 
     public int QuestionId { get; set; }
