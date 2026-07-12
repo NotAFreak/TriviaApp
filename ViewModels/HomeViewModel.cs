@@ -2,6 +2,12 @@
 using TriviaApp.Models;
 
 namespace TriviaApp.ViewModels;
+using Leaderboard = System.Collections.Generic.List<TriviaApp.ViewModels.LeaderboardEntry>;
+
+public class LeaderboardEntry {
+	public required string username = "???";
+	public required float time = -1.0f;
+}
 
 public class HomeViewModel : BaseViewModel {
 	//	Leaderboards
@@ -17,4 +23,9 @@ public class HomeViewModel : BaseViewModel {
 	// Nice info
 	private Dictionary<int, Category> categories = new();
 	private Dictionary<int, Difficulty> difficulties = new();
+	
+	// Leaderboards
+	public Leaderboard dailyLeaderboard = new();
+	public Leaderboard globalLeaderboard = new();
+	
 }

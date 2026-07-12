@@ -1,27 +1,71 @@
 ﻿@using System.Globalization
+@using TriviaApp.ViewModels
 @model TriviaApp.ViewModels.HomeViewModel
 @{
     ViewData["Title"] = "Home Page";
 }
 <h1>Home</h1>
-<div class="d-flex">
-    <div class="col-md-3 p-1">
+<div class="row p-2">
+    <div class="col-lg-3 p-1">
         <h2>Leaderboards</h2>
-        <div class="card mb-3 shadow">
+        <div class="card md-3 mb-2 shadow">
             <h3 class="card-header text-center">Global Leaderboard</h3>
-            <div class="card-body">
-                
+            <div class="card-body p-0">
+                @if (Model.globalLeaderboard.Count == 0) {
+                    <small class="m-1">Oops, nobody is here!</small>
+                }
+                else {
+                    <table class="table table-hover text-truncate w-100" style="table-layout: fixed">
+                        <thead>
+                        <tr>
+                            <th scope="col" style="width: 30px">#</th>
+                            <th scope="col">Username</th>
+                            <th scope="col" style="width: 110px">Avg Time(s)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @for (int i = 0; i < Model.globalLeaderboard.Count; i++) {
+                            <tr>
+                                <th scope="row">@i</th>
+                                <td class="text-truncate" data-bs-toggle="tooltip" data-bs-title="@Model.globalLeaderboard[i].username">@Model.globalLeaderboard[i].username</td>
+                                <td>@(Model.globalLeaderboard[i].time)s</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
             </div>
         </div>
         <div class="card mb-3 shadow">
             <h3 class="card-header text-center">Daily Leaderboard</h3>
-            <div class="card-body">
-
+            <div class="card-body p-0">
+                @if (Model.dailyLeaderboard.Count == 0) {
+                    <small class="m-1">Oops, nobody is here!</small>
+                }
+                else {
+                    <table class="table table-hover text-truncate w-100" style="table-layout: fixed">
+                        <thead>
+                        <tr>
+                            <th scope="col" style="width: 30px">#</th>
+                            <th scope="col">Username</th>
+                            <th scope="col" style="width: 110px">Time(s)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @for (int i = 0; i < Model.dailyLeaderboard.Count; i++) {
+                            <tr>
+                                <th scope="row">@i</th>
+                                <td class="text-truncate" data-bs-toggle="tooltip" data-bs-title="@Model.dailyLeaderboard[i].username">@Model.globalLeaderboard[i].username</td>
+                                <td>@(Model.dailyLeaderboard[i].time)s</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
             </div>
         </div>
     </div>
-    <hr class="vr"/>
-    <div class="col-md-6 p-1">
+    <div class="col-lg-6 p-1">
         <h2>Questions</h2>
         <!--Daily APIQuestion-->
         <div>
@@ -75,8 +119,7 @@
             </div>
         </div>
     </div>
-    <hr class="vr"/>
-    <div class="col-md-3 p-1">
+    <div class="col-lg-3 p-1">
         <h2>Statistics</h2>
         @if (User.Identity is not null && User.Identity.IsAuthenticated) {
             <div class="card h-100 mb-3 shadow">
@@ -117,6 +160,9 @@
 </div>
 @section Scripts {
     <script>
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
         function ShowLoading() {
             document.getElementById("spin_DailyQuestion").style.visibility = "visible";
         }

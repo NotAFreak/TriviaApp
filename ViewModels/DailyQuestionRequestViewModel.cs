@@ -19,6 +19,7 @@ public class ClientQuestion {
 	
 	public ClientQuestion() { }
 	public ClientQuestion(Question question) {
+		this.QuestionId = question.QuestionId;
 		this.Text = question.Text;
 		foreach (Answer answer in question.Answers) {
 			this.Answers.Add(new(answer));

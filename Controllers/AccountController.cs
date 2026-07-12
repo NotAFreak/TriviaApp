@@ -98,8 +98,13 @@ public class AccountController : Controller {
             TempData["Error"] = "Email not valid!";
             return RedirectToAction("Signup", "Account");
         }
-        if (password.Length < 6) {
-            TempData["Error"] = "Password needs to be 6 or more characters long!";
+
+        if (username.Length > 16) {
+            TempData["Error"] = "Username needs to be less than or equal to 16 characters long!";
+            return RedirectToAction("Signup", "Account");
+        }
+        if (password.Length is < 6 or > 32) {
+            TempData["Error"] = "Password needs to be 6 or more, and less than 32 characters long!";
             return RedirectToAction("Signup", "Account");
         }
         if (await db.Users.FirstOrDefaultAsync(o => o.Email == email) != null) {

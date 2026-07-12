@@ -16,6 +16,7 @@ public static class TriviaTimer {
 		UserTiming timing = new() {
 			questionId = questionId
 		};
+		Assert.IsTrue(!userTimings.ContainsKey(userId));
 		userTimings.Add(userId, timing);
 	}
 

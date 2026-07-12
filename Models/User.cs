@@ -15,5 +15,7 @@ public partial class User
 
     public int Role { get; set; }
 
+    public int DisplayLeaderboard { get; set; }
+
     public virtual ICollection<UserQuestion> UserQuestions { get; set; } = new List<UserQuestion>();
 }

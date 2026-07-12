@@ -1,9 +1,29 @@
+@using System.Security.Claims
 @{
     ViewData["Title"] = "Account";
 }
 
 <div class="row">
-    <div class="col-md">
+    <div class="col-md-6">
+        <form>
+            <fieldset>
+                <div>
+                    <label for="in_Username" class="form-label">Username: </label>
+                    <input id="in_Username" class="form-control" type="text" placeholder="Username..." value="@User.FindFirst("username")?.Value"/>
+                </div>
+                <div class="mt-2">
+                    <label class="form-label">Email: </label>
+                    <input id="in_Email" class="form-control" type="email" placeholder="Email..." value="@User.FindFirst(ClaimTypes.Email)?.Value"/>
+                </div>
+                <div class="mt-2">
+                    <label class="form-label">Role: </label>
+                    <p>@User.FindFirst(ClaimTypes.Role)?.Value</p>
+                </div>
+            </fieldset>
+            <button class="btn btn-success disabled">Update Changes</button>
+        </form>
+    </div>
+    <div class="col-md-6">
         @if (!string.IsNullOrEmpty((string?)TempData["Error"])) {
             <div class="alert alert-dismissible alert-danger">
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -13,7 +33,7 @@
         <form asp-action="LogoutPost" asp-controller="Account">
             <button type="submit" class="btn btn-danger" asp-controller="Account" asp-action="LogoutPost">Logout</button>
         </form>
-        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-account-modal">
+        <button type="button" class="btn btn-danger mt-2" data-bs-toggle="modal" data-bs-target="#delete-account-modal">
             Delete Account
         </button>
     </div>

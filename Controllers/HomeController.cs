@@ -9,10 +9,12 @@ using TriviaApp.Models;
 using TriviaApp.Runtime;
 using TriviaApp.ViewModels;
 using Question = TriviaApp.Models.Question;
+using Leaderboard = System.Collections.Generic.List<TriviaApp.ViewModels.LeaderboardEntry>;
 
 namespace TriviaApp.Controllers;
 
 public class HomeController : Controller {
+    public const uint maxLeaderboardSize = 10;
     private TriviaContext db;
 
     public HomeController(TriviaContext db) {
@@ -58,8 +60,13 @@ public class HomeController : Controller {
             Question originalQuestion = await TriviaAPI.Client.CurrentDailyQuestion(db);
             await TryAddNewQuestion(originalQuestion);
             vm.question = new ClientQuestion(originalQuestion);
+            
             UserQuestion? answer = user.UserQuestions.FirstOrDefault(o => o.QuestionId == vm.question.QuestionId);
             vm.HasCompleted = answer is not null;
+            if (answer is not null) {
+                Assert.IsTrue(answer.UserId == userId);
+                vm.question = null;
+            }
         } else {
             Claim? claim = HttpContext.User.FindFirst("completed_Daily");
             if (claim is null) {
@@ -73,8 +80,12 @@ public class HomeController : Controller {
         }
 
         if (isUser) {
-            Assert.IsNotNull(vm.question);
-            TriviaTimer.StartUser((int)await GetUserId(), vm.question.QuestionId);
+            if (vm.HasCompleted) {
+                Assert.IsNull(vm.question);
+            } else {
+                Assert.IsNotNull(vm.question);
+                TriviaTimer.StartUser((int)await GetUserId(), vm.question.QuestionId);
+            }
         }
         return Json(JsonConvert.SerializeObject(vm));
     }
@@ -129,7 +140,6 @@ public class HomeController : Controller {
                 return RedirectToAction("Login", "Account");
             }
         }
-
         if (isUser) {
             User user = await db.Users.Include(o => o.UserQuestions).FirstAsync(o=>o.UserId == Convert.ToInt32(userIdClaim.Value));
             List<UserQuestion> userQuestions = user.UserQuestions.Where(o =>
@@ -146,6 +156,44 @@ public class HomeController : Controller {
             vm.MaximumAnswerTime = (float)userQuestions.Max(o => o.CompletionTime);
         }
         
+        // Gen leaderboards
+        List<Models.User> users = await db.Users.Include(o=>o.UserQuestions).Where(o=>o.DisplayLeaderboard == 1).ToListAsync();
+        Leaderboard daily = new();
+        foreach (Models.User user in users) {
+            Question dailyQuestion = await TriviaAPI.Client.CurrentDailyQuestion(db);
+            UserQuestion? answer = user.UserQuestions.FirstOrDefault(o=>o.QuestionId == dailyQuestion.QuestionId);
+            if(answer is null) continue;
+            if(answer.CompletionState != (int)CompletionState.Correct) continue;
+            daily.Add(new LeaderboardEntry() {
+                time = (float)answer.CompletionTime,
+                username = user.Username
+            });
+            if(daily.Count >= maxLeaderboardSize) break;
+        }
+        if (daily.Count != 0) {
+            daily = daily.OrderByDescending(o=>o.time).ToList();
+        }
+        vm.dailyLeaderboard = daily;
+        Leaderboard global = new();
+        foreach (Models.User user in users) {
+            if (user.DisplayLeaderboard == 1) {
+                if(user.UserQuestions.Count == 0) continue;
+                List<UserQuestion> questions = user.UserQuestions.Where(o => o.CompletionState == (int)CompletionState.Correct).ToList();
+                if(questions.Count == 0) continue;
+                float time = (float)questions.Average(o => o.CompletionTime);
+                global.Add(new LeaderboardEntry() {
+                    time = time,
+                    username = user.Username
+                });
+                if(global.Count >= maxLeaderboardSize) break;
+            }
+        }
+
+        if (global.Count != 0) {
+            global = global.OrderByDescending(o=>o.time).ToList();
+        }
+
+        vm.globalLeaderboard = global;
         return View(vm);
     }
 
