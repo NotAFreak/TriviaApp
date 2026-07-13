@@ -4,23 +4,34 @@
 }
 
 <div class="row">
+    <h1>Manage Account</h1>
     <div class="col-md-6">
-        <form>
+        <h2>Update Info</h2>
+        <form asp-action="UpdateInfoPost" asp-controller="Account">
             <fieldset>
                 <div>
-                    <label for="in_Username" class="form-label">Username: </label>
-                    <input id="in_Username" class="form-control" type="text" placeholder="Username..." value="@User.FindFirst("username")?.Value"/>
+                    <label class="form-label">Username (Optional): </label>
+                    <input name="username" oninput="SetAccountInfoDirty(true)" class="form-control" type="text" placeholder="Username..." value="@User.FindFirst("username")?.Value"/>
                 </div>
                 <div class="mt-2">
-                    <label class="form-label">Email: </label>
-                    <input id="in_Email" class="form-control" type="email" placeholder="Email..." value="@User.FindFirst(ClaimTypes.Email)?.Value"/>
+                    <label class="form-label">Email (Optional): </label>
+                    <input name="email" oninput="SetAccountInfoDirty(true)" class="form-control" type="email" placeholder="Email..." value="@User.FindFirst(ClaimTypes.Email)?.Value"/>
+                </div>
+                <div class="mt-2">
+                    <label class="form-label">Password (Optional): </label>
+                    <input name="password" oninput="SetAccountInfoDirty(true)" class="form-control" type="password" placeholder="Password..." value=""/>
                 </div>
                 <div class="mt-2">
                     <label class="form-label">Role: </label>
                     <p>@User.FindFirst(ClaimTypes.Role)?.Value</p>
                 </div>
             </fieldset>
-            <button class="btn btn-success disabled">Update Changes</button>
+            <hr/>
+            <div class="mt-2 mb-3">
+                <label class="form-label">Confirm Password: </label>
+                <input id="in_ConfirmPassword" name="confirmPassword" oninput="SetAccountInfoDirty(true)" class="form-control" type="password" placeholder="Password..."/>
+            </div>
+            <button type="submit" id="btn_UpdateChanges" onclick="SetAccountInfoDirty(false)" class="btn btn-success disabled">Update Changes</button>
         </form>
     </div>
     <div class="col-md-6">
@@ -65,3 +76,20 @@
         </div>
     </div>
 </div>
+@section Scripts {
+    <script>
+        function SetAccountInfoDirty(isDirty) {
+            let button = document.getElementById("btn_UpdateChanges");
+            
+            let confirmPassword = document.getElementById("in_ConfirmPassword");
+            if(confirmPassword.value === "") {
+                isDirty = false;
+            }
+            if(isDirty) {
+                button.classList.remove("disabled");
+            } else {
+                button.classList.add("disabled");
+            }
+        }
+    </script>
+}

@@ -84,6 +84,50 @@ public class AccountController : Controller {
     public async Task<IActionResult> Signup() {
         return View();
     }
+    
+    [HttpPost]
+    public async Task<IActionResult> UpdateInfoPost(string? username, string? email, string? password, string confirmPassword) {
+        // Verify the user
+        Claim? idClaim = HttpContext.User.FindFirst("userid");
+        Claim? passwordClaim = HttpContext.User.FindFirst("password");
+        if (idClaim is null || passwordClaim is null) {
+            TempData["Error"] = "Couldn't verify cookies! Logged out";
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Login", "Account");
+        }
+        User? user = await db.Users.FirstOrDefaultAsync(o=>o.UserId == Convert.ToInt32(idClaim.Value));
+        if (user is null) {
+            TempData["Error"] = "User does not exist! Logged out";
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Signup", "Account");
+        }
+        if (user.Password != passwordClaim.Value.ToString()) {
+            TempData["Error"] = "Password not correct! Logged out";
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Index", "Account");
+        }
+        if (user.Password != HashPassword(user.Email, confirmPassword)) {
+            TempData["Error"] = "Confirmation password is not correct!";
+            return RedirectToAction("Index", "Account");
+        }
+        
+        // Actually update info now
+        if (email is not null) {
+            user.Email = email;
+        }
+
+        if (username is not null) {
+            user.Username = username;
+        }
+
+        if (password is not null) {
+            user.Password = HashPassword(user.Email, password);
+        }
+        db.Users.Update(user);
+        await db.SaveChangesAsync();
+        await AssignCookie(user);
+        return RedirectToAction("Index", "Account");
+    }
     [HttpPost]
     public async Task<IActionResult> SignupPost(string email, string username, string password) {
         if (string.IsNullOrWhiteSpace(email.Trim())) {
