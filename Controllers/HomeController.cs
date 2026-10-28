@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -122,6 +123,8 @@ public class HomeController : Controller {
         return Json(JsonConvert.SerializeObject(vm));
     }
     
+    [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Index() {
         HomeViewModel vm = new();
         bool isUser = HttpContext.User.Identity is not null && HttpContext.User.Identity.IsAuthenticated;
@@ -139,12 +142,10 @@ public class HomeController : Controller {
                 await HttpContext.SignOutAsync();
                 return RedirectToAction("Login", "Account");
             }
-        }
-        if (isUser) {
-            User user = await db.Users.Include(o => o.UserQuestions).FirstAsync(o=>o.UserId == Convert.ToInt32(userIdClaim.Value));
+            
             List<UserQuestion> userQuestions = user.UserQuestions.Where(o =>
-                (byte)o.CompletionState != (byte)CompletionState.OutOfTime &&
-                (byte)o.CompletionState != (byte)CompletionState.Unknown)
+                    (byte)o.CompletionState != (byte)CompletionState.OutOfTime &&
+                    (byte)o.CompletionState != (byte)CompletionState.Unknown)
                 .ToList();
             if (userQuestions.Count == 0) return View(vm);
             vm.TotalAnswered = userQuestions.Count;

@@ -114,7 +114,7 @@
                 </div>
             </div>
             <div id="alrt_NoDailyQuestion" class="alert alert-dismissible alert-secondary mb-3 shadow" style="visibility: collapse">
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close ms-5" data-bs-dismiss="alert" value="Close"></button>
                 <p>Already completed today's trivia question</p>
             </div>
         </div>
@@ -127,31 +127,31 @@
                 <div class="card-body">
                     <h4>Scores</h4>
                     <div class="form-horizontal">
-                        <label class="float-end">@Model.TotalAnswered.ToString(CultureInfo.InvariantCulture)</label>
-                        <label class="">Total Answered: </label>
+                        <p id="p_TotalAnswered" class="float-end m-0">@Model.TotalAnswered.ToString(CultureInfo.InvariantCulture)</p>
+                        <label for="p_TotalAnswered">Total Answered: </label>
                     </div>
                     <div class="form-horizontal">
-                        <label class="float-end">@Model.TotalCorrect.ToString(CultureInfo.InvariantCulture)</label>
-                        <label>Total Correct: </label>
+                        <p id="p_TotalCorrect" class="float-end m-0">@Model.TotalCorrect.ToString(CultureInfo.InvariantCulture)</p>
+                        <label for="p_TotalCorrect">Total Correct: </label>
                     </div>
                     <div class="form-horizontal">
-                        <label class="float-end">@Model.TotalIncorrect.ToString(CultureInfo.InvariantCulture)</label>
-                        <label>Total Incorrect: </label>
+                        <p id="p_TotalIncorrect" class="float-end m-0">@Model.TotalIncorrect.ToString(CultureInfo.InvariantCulture)</p>
+                        <label for="p_TotalIncorrect">Total Incorrect: </label>
                     </div>
                 </div>
                 <div class="card-body">
                     <h4>Times</h4>
                     <div class="form-horizontal">
-                        <label class="float-end">@Model.AverageAnswerTime.ToString(CultureInfo.InvariantCulture)s</label>
-                        <label>Average Answer Time: </label>
+                        <p id="p_AverageAnswer" class="float-end m-0">@Model.AverageAnswerTime.ToString(CultureInfo.InvariantCulture)s</p>
+                        <label for="p_AverageAnswer">Average Answer Time: </label>
                     </div>
                     <div class="form-horizontal">
-                        <label class="float-end">@Model.MinimumAnswerTime.ToString(CultureInfo.InvariantCulture)s</label>
-                        <label>Minimum Answer Time: </label>
+                        <p id="p_MinimumAnswer" class="float-end m-0">@Model.MinimumAnswerTime.ToString(CultureInfo.InvariantCulture)s</p>
+                        <label for="p_MinimumAnswer">Minimum Answer Time: </label>
                     </div>
                     <div class="form-horizontal">
-                        <label class="float-end">@Model.MaximumAnswerTime.ToString(CultureInfo.InvariantCulture)s</label>
-                        <label>Maximum Answer Time: </label>
+                        <p id="p_MaximumAnswer" class="float-end m-0">@Model.MaximumAnswerTime.ToString(CultureInfo.InvariantCulture)s</p>
+                        <label for="p_MaximumAnswer">Maximum Answer Time: </label>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Privacy Policy";
+}
+<h1>Privacy Policy</h1>
+<p>
+    [Organisation] values and respects the privacy of the people we deal with. [Organisation] is committed to
+    protecting your privacy and complying with the <a href="https://www.legislation.gov.au/C2004A03712/latest/versions"> Privacy Act 1988 (Cth)</a> and other applicable
+    privacy laws and regulations.
+</p>
+<p>
+    This Privacy Policy describes how we collect, hold, use and disclose your personal information, and
+    how we maintain the quality and security of your personal information.
+</p>
+<h2>What personal information is collected?</h2>
+<ul>
+    <li>Emails</li>
+    <li>Usernames</li>
+</ul>
+<h2>How is this information collected?</h2>
+<p>
+    When you sign up. That's it.
+</p>

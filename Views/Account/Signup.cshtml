@@ -4,6 +4,7 @@
 
 <div class="row">
     <div class="container">
+        <h1>@ViewData["Title"]</h1>
         @if (!string.IsNullOrEmpty((string?)TempData["Error"])) {
             <div class="alert alert-dismissible alert-danger">
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -12,10 +13,10 @@
         }
         <form class="input-group" asp-action="SignupPost" asp-controller="Account">
             <fieldset>
-                <label for="in_Email" class="form-label">Email</label>
-                <input id="in_Email" name="email" type="email" class="form-control" placeholder="Email"/>
-                <label for="in_Username" class="form-label">Username</label>
-                <input id="in_Username" name="username" type="text" class="form-control" placeholder="Username..."/>
+                <label for="in_updEmail" class="form-label">Email</label>
+                <input id="in_updEmail" name="email" type="email" class="form-control" placeholder="Email"/>
+                <label for="in_updUsername" class="form-label">Username</label>
+                <input id="in_updUsername" name="username" type="text" class="form-control" placeholder="Username..."/>
                 <label for="in_Password" class="form-label">Password</label>
                 <input id="in_Password" name="password" type="password" class="form-control" placeholder="Password..."/>
                 <label for="in_ConfirmPassword" class="form-label">Confirm Password</label>

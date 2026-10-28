@@ -10,25 +10,25 @@
         <form asp-action="UpdateInfoPost" asp-controller="Account">
             <fieldset>
                 <div>
-                    <label class="form-label">Username (Optional): </label>
-                    <input name="username" oninput="SetAccountInfoDirty(true)" class="form-control" type="text" placeholder="Username..." value="@User.FindFirst("username")?.Value"/>
+                    <label for="in_updUsername" class="form-label">Username (Optional): </label>
+                    <input id="in_updUsername" name="username" oninput="SetAccountInfoDirty(true)" class="form-control" type="text" placeholder="Username..." value="@User.FindFirst("username")?.Value"/>
                 </div>
                 <div class="mt-2">
-                    <label class="form-label">Email (Optional): </label>
-                    <input name="email" oninput="SetAccountInfoDirty(true)" class="form-control" type="email" placeholder="Email..." value="@User.FindFirst(ClaimTypes.Email)?.Value"/>
+                    <label for="in_updEmail" class="form-label">Email (Optional): </label>
+                    <input id="in_updEmail" name="email" oninput="SetAccountInfoDirty(true)" class="form-control" type="email" placeholder="Email..." value="@User.FindFirst(ClaimTypes.Email)?.Value"/>
                 </div>
                 <div class="mt-2">
-                    <label class="form-label">Password (Optional): </label>
-                    <input name="password" oninput="SetAccountInfoDirty(true)" class="form-control" type="password" placeholder="Password..." value=""/>
+                    <label for="in_updPassword" class="form-label">Password (Optional): </label>
+                    <input id="in_updPassword" name="password" oninput="SetAccountInfoDirty(true)" class="form-control" type="password" placeholder="Password..." value=""/>
                 </div>
                 <div class="mt-2">
-                    <label class="form-label">Role: </label>
-                    <p>@User.FindFirst(ClaimTypes.Role)?.Value</p>
+                    <label for="p_Role" class="form-label">Role: </label>
+                    <p id="p_Role">@User.FindFirst(ClaimTypes.Role)?.Value</p>
                 </div>
             </fieldset>
             <hr/>
             <div class="mt-2 mb-3">
-                <label class="form-label">Confirm Password: </label>
+                <label for="in_ConfirmPassword" class="form-label">Confirm Password: </label>
                 <input id="in_ConfirmPassword" name="confirmPassword" oninput="SetAccountInfoDirty(true)" class="form-control" type="password" placeholder="Password..."/>
             </div>
             <button type="submit" id="btn_UpdateChanges" onclick="SetAccountInfoDirty(false)" class="btn btn-success disabled">Update Changes</button>
